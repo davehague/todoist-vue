@@ -61,7 +61,10 @@
         @clear="clearSearch"
         @copy="copyToClipboard"
       />
-
+      <FilterBar
+        :tasks="tasks"
+        @update:filters="updateFilters"
+      />
       <TaskList :tasks="sortedTasks" @select="selectedTask = $event" />
 
       <TaskModal :task="selectedTask" @close="selectedTask = null" />
@@ -91,6 +94,7 @@ import { useSecureStorage } from "./utils/encryption";
 import SearchBar from "./components/SearchBar.vue";
 import TaskList from "./components/TaskList.vue";
 import TaskModal from "./components/TaskModal.vue";
+import FilterBar from "./components/FilterBar.vue";
 
 // Initialize secure storage with 'todoist' namespace
 const { setSecureItem, getSecureItem, removeSecureItem } = useSecureStorage('todoist');
@@ -103,11 +107,69 @@ const apiToken = ref("");
 const showTokenInput = ref(false);
 const isLoading = ref(false);
 
+const filterSettings = ref({
+  dueFilter: 'all',
+  label: '',
+  sort: 'created_desc',
+  projectSection: ''
+});
+
 const sortedTasks = computed(() => {
-  return [...filteredTasks.value].sort((a, b) => {
-    const dateA = a.created_at || "0000-01-01";
-    const dateB = b.created_at || "0000-01-01";
-    return dateB.localeCompare(dateA);
+  let filtered = filteredTasks.value;
+
+  // Apply project and section filter
+  if (filterSettings.value.projectSection) {
+    const [project, section] = filterSettings.value.projectSection.split(' > ');
+    filtered = filtered.filter(task => {
+      if (section) {
+        return task.project_name === project && task.section_name === section;
+      }
+      return task.project_name === project;
+    });
+  }
+
+  // Apply due date filter
+  if (filterSettings.value.dueFilter !== 'all') {
+    const today = new Date().toISOString().split('T')[0];
+    filtered = filtered.filter(task => {
+      switch (filterSettings.value.dueFilter) {
+        case 'today':
+          return task.due?.date && (task.due.date <= today);
+        case 'has_due':
+          return !!task.due;
+        case 'no_due':
+          return !task.due;
+        default:
+          return true;
+      }
+    });
+  }
+
+  // Apply label filter
+  if (filterSettings.value.label) {
+    filtered = filtered.filter(task => 
+      task.labels?.includes(filterSettings.value.label)
+    );
+  }
+
+  // Apply sorting
+  return [...filtered].sort((a, b) => {
+    switch (filterSettings.value.sort) {
+      case 'due_asc':
+        return (a.due?.date || '9999') > (b.due?.date || '9999') ? 1 : -1;
+      case 'due_desc':
+        return (a.due?.date || '9999') < (b.due?.date || '9999') ? 1 : -1;
+      case 'created_asc':
+        return a.created_at > b.created_at ? 1 : -1;
+      case 'created_desc':
+        return a.created_at < b.created_at ? 1 : -1;
+      case 'project':
+        return a.project_name.localeCompare(b.project_name);
+      case 'content':
+        return a.content.localeCompare(b.content);
+      default:
+        return 0;
+    }
   });
 });
 
@@ -241,6 +303,15 @@ onMounted(async () => {
 
 // Watch for search query changes
 watch(searchQuery, handleSearch);
+
+const updateFilters = (filters: { 
+  dueFilter: string; 
+  label: string; 
+  sort: string;
+  projectSection: string;
+}) => {
+  filterSettings.value = filters;
+};
 </script>
 
 <style>
