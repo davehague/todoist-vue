@@ -59,23 +59,41 @@
         v-model="searchQuery"
         :total-tasks="tasks.length"
         @clear="clearSearch"
-        @change-token="showTokenInput = true"
         @copy="copyToClipboard"
       />
 
       <TaskList :tasks="sortedTasks" @select="selectedTask = $event" />
 
       <TaskModal :task="selectedTask" @close="selectedTask = null" />
+
+      <!-- New Footer with Change Token Button -->
+      <div class="mt-auto border-t dark:border-gray-700 p-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+          <span class="text-sm text-gray-500 dark:text-gray-400 italic">
+            Using Todoist API Token
+          </span>
+          <button
+            @click="handleChangeToken"
+            class="px-4 py-2 text-sm text-red-900 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
+          >
+            Change API Token
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import type { Task, Project } from "./types/interfaces";
+import { useSecureStorage } from "./utils/encryption";
 import SearchBar from "./components/SearchBar.vue";
 import TaskList from "./components/TaskList.vue";
 import TaskModal from "./components/TaskModal.vue";
+
+// Initialize secure storage with 'todoist' namespace
+const { setSecureItem, getSecureItem, removeSecureItem } = useSecureStorage('todoist');
 
 const tasks = ref<Task[]>([]);
 const filteredTasks = ref<Task[]>([]);
@@ -109,6 +127,16 @@ const clearSearch = () => {
   handleSearch();
 };
 
+const handleChangeToken = async () => {
+  if (confirm('Are you sure you want to change the API token? This will clear your current view.')) {
+    showTokenInput.value = true;
+    tasks.value = [];
+    filteredTasks.value = [];
+    apiToken.value = "";
+    await removeSecureItem('api_token');
+  }
+};
+
 const copyToClipboard = async (event: MouseEvent, limit?: number) => {
   event.preventDefault();
   const tasksToCopy = limit
@@ -132,8 +160,13 @@ const copyToClipboard = async (event: MouseEvent, limit?: number) => {
 };
 
 const fetchTasks = async () => {
+  if (!apiToken.value) return;
+  
   isLoading.value = true;
   try {
+    // Save the API token securely
+    await setSecureItem('api_token', apiToken.value);
+
     // Fetch projects
     const projectsResponse = await fetch(
       "https://api.todoist.com/rest/v2/projects",
@@ -191,10 +224,20 @@ const fetchTasks = async () => {
   } catch (error) {
     console.error("Error fetching tasks:", error);
     alert("Error fetching tasks. Please check your API token.");
+    await removeSecureItem('api_token');
   } finally {
     isLoading.value = false;
   }
 };
+
+// Load saved token and fetch tasks on mount
+onMounted(async () => {
+  const savedToken = await getSecureItem('api_token');
+  if (savedToken) {
+    apiToken.value = savedToken;
+    await fetchTasks();
+  }
+});
 
 // Watch for search query changes
 watch(searchQuery, handleSearch);

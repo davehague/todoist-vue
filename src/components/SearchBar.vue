@@ -1,6 +1,8 @@
 <template>
   <div class="py-4 z-10 w-full border-b dark:border-gray-700">
-    <div class="flex flex-wrap gap-2 max-w-[800px] w-full mx-auto">
+    <div class="flex flex-wrap gap-2 w-full mx-auto">
+
+      <!-- Search bar -->
       <div class="relative flex-1 w-full md:w-auto">
         <MagnifyingGlassIcon
           class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"
@@ -17,6 +19,7 @@
             )
           "
         />
+        <!-- Clear button -->
         <button
           v-if="modelValue"
           @click="$emit('clear')"
@@ -63,13 +66,6 @@
             </button>
           </div>
         </div>
-
-        <button
-          @click="$emit('changeToken')"
-          class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-        >
-          Change Token
-        </button>
       </div>
     </div>
   </div>
