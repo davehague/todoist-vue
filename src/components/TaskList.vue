@@ -1,6 +1,6 @@
 <template>
   <div class="flex-1 overflow-y-auto">
-    <div class="space-y-2 pt-4 max-w-[800px] min-w-[800px] mx-auto">
+    <div class="space-y-2 pt-4 max-w-[800px] w-full mx-auto">
       <TaskItem
         v-for="task in tasks"
         :key="task.id"

@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-white py-4 z-10 w-full border-b">
-    <div class="flex gap-2 max-w-[800px] min-w-[800px] mx-auto">
-      <div class="relative flex-1">
+  <div class="py-4 z-10 w-full border-b dark:border-gray-700">
+    <div class="flex flex-wrap gap-2 max-w-[800px] w-full mx-auto">
+      <div class="relative flex-1 w-full md:w-auto">
         <MagnifyingGlassIcon
           class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"
         />
@@ -38,37 +38,39 @@
         </button>
       </div>
 
-      <div class="relative">
-        <button
-          @click="toggleDropdown"
-          :disabled="isCopying"
-          class="px-4 py-2 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-        >
-          <CheckIcon v-if="isCopying" class="h-4 w-4" />
-          {{ isCopying ? "Copied!" : "Copy Tasks" }}
-          <span class="ml-2">▼</span>
-        </button>
-        <div
-          v-if="showDropdown"
-          class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg"
-        >
+      <div class="flex gap-2 w-full md:w-auto">
+        <div class="relative">
           <button
-            v-for="option in copyOptions"
-            :key="option.limit"
-            @click="handleCopy($event, option.limit)"
-            class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+            @click="toggleDropdown"
+            :disabled="isCopying"
+            class="px-4 py-2 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
-            {{ option.label }}
+            <CheckIcon v-if="isCopying" class="h-4 w-4" />
+            {{ isCopying ? "Copied!" : "Copy Tasks" }}
+            <span class="ml-2">▼</span>
           </button>
+          <div
+            v-if="showDropdown"
+            class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg"
+          >
+            <button
+              v-for="option in copyOptions"
+              :key="option.limit"
+              @click="handleCopy($event, option.limit)"
+              class="block w-full px-4 py-2 text-sm text-left hover:bg-gray-100"
+            >
+              {{ option.label }}
+            </button>
+          </div>
         </div>
-      </div>
 
-      <button
-        @click="$emit('changeToken')"
-        class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-      >
-        Change Token
-      </button>
+        <button
+          @click="$emit('changeToken')"
+          class="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          Change Token
+        </button>
+      </div>
     </div>
   </div>
 </template>

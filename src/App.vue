@@ -1,15 +1,15 @@
 <template>
-  <div class="p-12 max-w-none">
+  <div class="p-4 md:p-12 max-w-none dark:bg-gray-900">
     <!-- API Token Input -->
     <div
       v-if="!tasks.length || showTokenInput"
-      class="min-w-[600px] max-w-6xl mx-auto space-y-6"
+      class="w-full max-w-6xl mx-auto space-y-6"
     >
       <div class="space-y-6 text-center">
-        <h1 class="text-4xl font-bold text-gray-900">Todoist Task Viewer</h1>
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white">Todoist Task Viewer</h1>
         <div class="space-y-3">
-          <p class="text-lg text-gray-600">To get started:</p>
-          <ol class="text-lg text-gray-600 list-decimal list-inside space-y-3">
+          <p class="text-lg text-gray-600 dark:text-gray-300">To get started:</p>
+          <ol class="text-lg text-gray-600 dark:text-gray-300 list-decimal list-inside space-y-3">
             <li>Go to Todoist Settings → Integrations → Developer</li>
             <li>Copy your API token</li>
             <li>Paste it below to load your tasks</li>
@@ -22,7 +22,7 @@
           type="password"
           v-model="apiToken"
           placeholder="Enter your Todoist API token"
-          class="w-full px-6 py-3 text-lg border rounded-lg"
+          class="w-full px-6 py-3 text-lg border rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
         />
         <button
           @click="fetchTasks"
@@ -54,7 +54,7 @@
       </div>
     </div>
 
-    <div v-else class="w-full min-w-[800px] h-screen flex flex-col">
+    <div v-else class="w-full h-screen flex flex-col">
       <SearchBar
         v-model="searchQuery"
         :total-tasks="tasks.length"
