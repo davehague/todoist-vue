@@ -6,10 +6,16 @@
       class="w-full max-w-6xl mx-auto space-y-6"
     >
       <div class="space-y-6 text-center">
-        <h1 class="text-4xl font-bold text-gray-900 dark:text-white">Todoist Task Viewer</h1>
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white">
+          Todoist Task Viewer
+        </h1>
         <div class="space-y-3">
-          <p class="text-lg text-gray-600 dark:text-gray-300">To get started:</p>
-          <ol class="text-lg text-gray-600 dark:text-gray-300 list-decimal list-inside space-y-3">
+          <p class="text-lg text-gray-600 dark:text-gray-300">
+            To get started:
+          </p>
+          <ol
+            class="text-lg text-gray-600 dark:text-gray-300 list-decimal list-inside space-y-3"
+          >
             <li>Go to Todoist Settings → Integrations → Developer</li>
             <li>Copy your API token</li>
             <li>Paste it below to load your tasks</li>
@@ -61,10 +67,7 @@
         @clear="clearSearch"
         @copy="copyToClipboard"
       />
-      <FilterBar
-        :tasks="tasks"
-        @update:filters="updateFilters"
-      />
+      <FilterBar :tasks="tasks" @update:filters="updateFilters" />
       <TaskList :tasks="sortedTasks" @select="selectedTask = $event" />
 
       <TaskModal :task="selectedTask" @close="selectedTask = null" />
@@ -84,6 +87,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Router View -->
+    <router-view></router-view>
   </div>
 </template>
 
@@ -97,7 +103,8 @@ import TaskModal from "./components/TaskModal.vue";
 import FilterBar from "./components/FilterBar.vue";
 
 // Initialize secure storage with 'todoist' namespace
-const { setSecureItem, getSecureItem, removeSecureItem } = useSecureStorage('todoist');
+const { setSecureItem, getSecureItem, removeSecureItem } =
+  useSecureStorage("todoist");
 
 const tasks = ref<Task[]>([]);
 const filteredTasks = ref<Task[]>([]);
@@ -108,10 +115,10 @@ const showTokenInput = ref(false);
 const isLoading = ref(false);
 
 const filterSettings = ref({
-  dueFilter: 'all',
-  label: '',
-  sort: 'created_desc',
-  projectSection: ''
+  dueFilter: "all",
+  label: "",
+  sort: "created_desc",
+  projectSection: "",
 });
 
 const sortedTasks = computed(() => {
@@ -119,8 +126,8 @@ const sortedTasks = computed(() => {
 
   // Apply project and section filter
   if (filterSettings.value.projectSection) {
-    const [project, section] = filterSettings.value.projectSection.split(' > ');
-    filtered = filtered.filter(task => {
+    const [project, section] = filterSettings.value.projectSection.split(" > ");
+    filtered = filtered.filter((task) => {
       if (section) {
         return task.project_name === project && task.section_name === section;
       }
@@ -129,15 +136,15 @@ const sortedTasks = computed(() => {
   }
 
   // Apply due date filter
-  if (filterSettings.value.dueFilter !== 'all') {
-    const today = new Date().toISOString().split('T')[0];
-    filtered = filtered.filter(task => {
+  if (filterSettings.value.dueFilter !== "all") {
+    const today = new Date().toISOString().split("T")[0];
+    filtered = filtered.filter((task) => {
       switch (filterSettings.value.dueFilter) {
-        case 'today':
-          return task.due?.date && (task.due.date <= today);
-        case 'has_due':
+        case "today":
+          return task.due?.date && task.due.date <= today;
+        case "has_due":
           return !!task.due;
-        case 'no_due':
+        case "no_due":
           return !task.due;
         default:
           return true;
@@ -147,7 +154,7 @@ const sortedTasks = computed(() => {
 
   // Apply label filter
   if (filterSettings.value.label) {
-    filtered = filtered.filter(task => 
+    filtered = filtered.filter((task) =>
       task.labels?.includes(filterSettings.value.label)
     );
   }
@@ -155,17 +162,17 @@ const sortedTasks = computed(() => {
   // Apply sorting
   return [...filtered].sort((a, b) => {
     switch (filterSettings.value.sort) {
-      case 'due_asc':
-        return (a.due?.date || '9999') > (b.due?.date || '9999') ? 1 : -1;
-      case 'due_desc':
-        return (a.due?.date || '9999') < (b.due?.date || '9999') ? 1 : -1;
-      case 'created_asc':
+      case "due_asc":
+        return (a.due?.date || "9999") > (b.due?.date || "9999") ? 1 : -1;
+      case "due_desc":
+        return (a.due?.date || "9999") < (b.due?.date || "9999") ? 1 : -1;
+      case "created_asc":
         return a.created_at > b.created_at ? 1 : -1;
-      case 'created_desc':
+      case "created_desc":
         return a.created_at < b.created_at ? 1 : -1;
-      case 'project':
+      case "project":
         return a.project_name.localeCompare(b.project_name);
-      case 'content':
+      case "content":
         return a.content.localeCompare(b.content);
       default:
         return 0;
@@ -190,12 +197,16 @@ const clearSearch = () => {
 };
 
 const handleChangeToken = async () => {
-  if (confirm('Are you sure you want to change the API token? This will clear your current view.')) {
+  if (
+    confirm(
+      "Are you sure you want to change the API token? This will clear your current view."
+    )
+  ) {
     showTokenInput.value = true;
     tasks.value = [];
     filteredTasks.value = [];
     apiToken.value = "";
-    await removeSecureItem('api_token');
+    await removeSecureItem("api_token");
   }
 };
 
@@ -223,11 +234,11 @@ const copyToClipboard = async (event: MouseEvent, limit?: number) => {
 
 const fetchTasks = async () => {
   if (!apiToken.value) return;
-  
+
   isLoading.value = true;
   try {
     // Save the API token securely
-    await setSecureItem('api_token', apiToken.value);
+    await setSecureItem("api_token", apiToken.value);
 
     // Fetch projects
     const projectsResponse = await fetch(
@@ -261,7 +272,9 @@ const fetchTasks = async () => {
     }
 
     const sections = await sectionsResponse.json();
-    const sectionMap = Object.fromEntries(sections.map((s: any) => [s.id, s.name]));
+    const sectionMap = Object.fromEntries(
+      sections.map((s: any) => [s.id, s.name])
+    );
 
     // Fetch tasks
     const tasksResponse = await fetch("https://api.todoist.com/rest/v2/tasks", {
@@ -276,6 +289,7 @@ const fetchTasks = async () => {
 
     const rawTasks = await tasksResponse.json();
 
+    console.log("Fetched task 0: ", rawTasks[0]);
     tasks.value = rawTasks.map((task: Task) => ({
       ...task,
       project_name: projectMap[task.project_id] || "No Project",
@@ -286,7 +300,7 @@ const fetchTasks = async () => {
   } catch (error) {
     console.error("Error fetching tasks:", error);
     alert("Error fetching tasks. Please check your API token.");
-    await removeSecureItem('api_token');
+    await removeSecureItem("api_token");
   } finally {
     isLoading.value = false;
   }
@@ -294,7 +308,7 @@ const fetchTasks = async () => {
 
 // Load saved token and fetch tasks on mount
 onMounted(async () => {
-  const savedToken = await getSecureItem('api_token');
+  const savedToken = await getSecureItem("api_token");
   if (savedToken) {
     apiToken.value = savedToken;
     await fetchTasks();
@@ -304,9 +318,9 @@ onMounted(async () => {
 // Watch for search query changes
 watch(searchQuery, handleSearch);
 
-const updateFilters = (filters: { 
-  dueFilter: string; 
-  label: string; 
+const updateFilters = (filters: {
+  dueFilter: string;
+  label: string;
   sort: string;
   projectSection: string;
 }) => {
